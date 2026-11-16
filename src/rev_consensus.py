@@ -43,7 +43,7 @@ elif a.mode == 'msne':
             d2 = ((Y[i0:i0 + 2000, None, :] - Y[None, :, :]) ** 2).sum(-1); Z += (1 / (1 + d2)).sum() - min(2000, n - i0)
         out = []
         for P in Ps:
-            P = P.tocoo(); m = P.row != P.col; p = P.data[m]
+            P = P.tocoo(); m = (P.row != P.col) & (P.data > 0); p = P.data[m]
             d2 = ((Y[P.row[m]] - Y[P.col[m]]) ** 2).sum(1); lq = -np.log1p(d2) - np.log(Z)
             out.append(float((p * (np.log(p) - lq)).sum()))
         return np.array(out)
