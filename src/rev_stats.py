@@ -42,8 +42,11 @@ out['sensitivity'] = sens[sens.emb != 'OHE'].groupby('method')[['aucE', 'knn']].
 ind = pd.concat([pd.read_csv(f) for f in glob.glob(f'{R}/tables/indep_*.csv')]) if glob.glob(f'{R}/tables/indep_*.csv') else None
 if ind is not None:
     ib = ind[ind.seed >= 0].groupby(['ds', 'emb', 'method']).auc_ref.mean().reset_index()
-    out['indep_ranks_noOHE'] = ranks(ib[ib.emb != 'OHE'].rename(columns={'auc_ref': 'v'}), 'v', [m for m in MAIN if m in set(ib.method)])
-    out['indep_dataset_means_noOHE'] = ib[ib.emb != 'OHE'].groupby(['method']).auc_ref.mean().sort_values(ascending=False).round(4).to_dict()
+    ibn = ib[ib.emb != 'OHE'].rename(columns={'auc_ref': 'v'}); fi = ibn.pivot_table(index=['ds', 'emb'], columns='method', values='v')
+    ci = [m for m in MAIN if m in fi.columns and fi[m].notna().sum() == fi.shape[0]]
+    out['indep_ranks_noOHE'] = ranks(ibn, 'v', ci)
+    dsi = ibn.groupby(['ds', 'method'])['v'].mean().reset_index(); out['indep_ranks_dataset_noOHE'] = ranks(dsi, 'v', ci)
+    out['indep_dataset_means_noOHE'] = dsi[dsi.method.isin(ci)].groupby('method').v.mean().sort_values(ascending=False).round(4).to_dict()
     out['indep_HD_kernels'] = ind[ind.seed < 0].groupby('method').auc_ref.mean().round(4).to_dict()
     ib.pivot_table(index='ds', columns='method', values='auc_ref').round(4).to_csv(f'{R}/tables/indep_by_dataset.csv')
 for f in ['case_hierarchy', 'case_quality']:
