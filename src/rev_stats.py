@@ -51,4 +51,5 @@ for f in ['case_hierarchy', 'case_quality']:
         c = pd.read_csv(f'{R}/tables/{f}.csv')
         out[f] = (c[c.emb == 'Spike2Vec'].groupby(['ds', 'child', 'method']).parent_rank.mean().round(2).unstack(0).to_dict() if f == 'case_hierarchy'
                   else c.round(4).to_dict(orient='records'))
-json.dump(out, open(f'{R}/tables/rev_stats.json', 'w'), indent=1, default=str); print('STATS_DONE')
+def sk(o): return {str(k): sk(v) for k, v in o.items()} if isinstance(o, dict) else o
+json.dump(sk(out), open(f'{R}/tables/rev_stats.json', 'w'), indent=1, default=str); print('STATS_DONE')
