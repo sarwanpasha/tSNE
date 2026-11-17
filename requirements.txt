@@ -6,3 +6,5 @@ matplotlib
 numba
 openTSNE
 umap-learn
+pynndescent
+rapidfuzz
